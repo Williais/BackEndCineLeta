@@ -15,7 +15,6 @@ import lombok.Setter;
 public class MovieCache {
     @Id
     @Column(name = "tmdb_id")
-    @Setter(AccessLevel.NONE)
     private Integer tmdbId;
 
     private String title;
