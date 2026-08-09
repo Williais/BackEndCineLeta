@@ -14,4 +14,5 @@ public interface UserMovieRepository extends JpaRepository<UserMovie, UUID> {
 
     Optional<UserMovie> findByUserAndMovie(User user, MovieCache movie);
     List<UserMovie> findBySession(WatchSession session);
+    List<UserMovie> findByUser(User user);
 }

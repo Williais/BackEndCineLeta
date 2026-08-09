@@ -1,5 +1,6 @@
 package com.example.CineLeta.services;
 
+import com.example.CineLeta.dtos.UserMovieResponseDTO;
 import com.example.CineLeta.models.MovieCache;
 import com.example.CineLeta.models.User;
 import com.example.CineLeta.models.UserMovie;
@@ -8,6 +9,7 @@ import com.example.CineLeta.repositories.UserMovieRepository;
 import com.example.CineLeta.repositories.UserRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -68,5 +70,15 @@ public class UserMovieService {
         return registroFinal;
     }
 
+    public List<UserMovieResponseDTO> getUserMovies(User user) {
+        List<UserMovie> avaliacoes = userMovieRepository.findByUser(user);
 
+        return avaliacoes.stream()
+                .map(avaliacao -> new UserMovieResponseDTO(
+                        avaliacao.getMovie().getTmdbId(),
+                        avaliacao.getRating(),
+                        avaliacao.getIsIgnored()
+                ))
+                .toList();
+    }
 }
