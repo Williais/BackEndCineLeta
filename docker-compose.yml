@@ -1,0 +1,47 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: cineleta-db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: cineleta_password123
+      POSTGRES_DB: cineleta
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    restart: always
+
+  backend:
+    build: .
+    container_name: cineleta-api
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/cineleta
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=cineleta_password123
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+      - SERVER_FORWARD_HEADERS_STRATEGY=framework
+    depends_on:
+      - postgres
+    restart: always
+
+  caddy:
+    image: caddy:2-alpine
+    container_name: cineleta-caddy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - backend
+
+volumes:
+  pgdata:
+  caddy_data:
+  caddy_config:

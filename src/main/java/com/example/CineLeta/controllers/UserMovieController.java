@@ -44,6 +44,20 @@ public class UserMovieController {
         return ResponseEntity.ok(savedInteraction);
     }
 
+    @DeleteMapping("/{tmdbId}")
+    public ResponseEntity<Void> removeInteraction(
+            @PathVariable Integer tmdbId,
+            @AuthenticationPrincipal OAuth2User principal) {
+
+        String email = principal.getAttribute("email");
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Usuário não encontrado."));
+
+        userMovieService.deleteUserMovie(user, tmdbId);
+
+        return ResponseEntity.noContent().build();
+    }
+
     @GetMapping("/dashboard")
     public ResponseEntity<DashboardDTO> getDashboard(@AuthenticationPrincipal OAuth2User principal) {
         String email = principal.getAttribute("email");

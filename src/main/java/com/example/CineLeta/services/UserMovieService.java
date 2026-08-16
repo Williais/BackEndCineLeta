@@ -169,4 +169,27 @@ public class UserMovieService {
     private DashboardDTO.DashboardMovieDTO toMovieDTO(UserMovie um) {
         return new DashboardDTO.DashboardMovieDTO(um.getMovie().getTmdbId(), um.getMovie().getTitle(), um.getMovie().getPosterPath(), um.getRating(), um.getIsFavorite());
     }
+
+    public void deleteUserMovie(User user, Integer tmdbId) {
+        MovieCache movie = movieCacheRepository.findById(tmdbId)
+                .orElseThrow(() -> new IllegalArgumentException("Filme não encontrado"));
+
+        UserMovie interaction = userMovieRepository.findByUserAndMovie(user, movie)
+                .orElseThrow(() -> new IllegalArgumentException("Avaliação não encontrada no seu histórico"));
+
+        if (interaction.getSession() != null) {
+            WatchSession session = interaction.getSession();
+
+            if (session.getCreator().getId().equals(user.getId())) {
+                List<UserMovie> allSessionInteractions = userMovieRepository.findBySession(session);
+                userMovieRepository.deleteAll(allSessionInteractions);
+                watchSessionRepository.delete(session);
+                return;
+            }
+        }
+
+        userMovieRepository.delete(interaction);
+    }
+
+
 }

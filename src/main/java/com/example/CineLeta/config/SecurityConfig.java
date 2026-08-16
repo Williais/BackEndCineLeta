@@ -40,7 +40,7 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource(){
         CorsConfiguration cors = new CorsConfiguration();
 
-        cors.addAllowedOrigin("http://localhost:5173");
+        cors.setAllowedOrigins(List.of("https://cineleta.vercel.app", "http://localhost:5173"));
         cors.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         cors.addAllowedHeader("*");
         cors.setAllowCredentials(true);

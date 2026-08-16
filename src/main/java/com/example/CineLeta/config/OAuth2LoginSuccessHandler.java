@@ -32,6 +32,6 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
 
         User usuarioLogado = userService.processOAuthPostLogin(email, userId, name);
 
-        response.sendRedirect("http://localhost:5173");
+        response.sendRedirect("https://cineleta.vercel.app");
     }
 }
