@@ -18,56 +18,41 @@ public class UserMovieService {
     private final UserMovieRepository userMovieRepository;
     private final UserRepository userRepository;
     private final MovieCacheRepository movieCacheRepository;
+    private final TmdbService tmdbService;
 
-    public UserMovieService(UserMovieRepository userMovieRepository, UserRepository userRepository, MovieCacheRepository movieCacheRepository) {
+    public UserMovieService( TmdbService tmdbService, UserMovieRepository userMovieRepository, UserRepository userRepository, MovieCacheRepository movieCacheRepository) {
         this.userMovieRepository = userMovieRepository;
         this.userRepository = userRepository;
         this.movieCacheRepository = movieCacheRepository;
+        this.tmdbService = tmdbService;
     }
 
-    public UserMovie evaluateMovie(UUID userId, Integer tmdbId, Integer rating, Boolean isIgnored) {
-        Optional<User> userOptional = userRepository.findById(userId);
+    public UserMovie evaluateMovie(UUID userId, Integer tmdbId, Integer rating, Boolean isFavorite, Boolean isIgnored) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("Usuario Nao Encontrado"));
 
-        if (userOptional.isEmpty()) {
-           throw new  IllegalArgumentException("Usuario Nao Encontrado");
-        }
+        MovieCache filmeAvaliado = movieCacheRepository.findById(tmdbId).orElseGet(() -> {
 
-        User user = userOptional.get();
-
-        Optional<MovieCache>  movieCache = movieCacheRepository.findById(tmdbId);
-        MovieCache filmeAvaliado;
-
-        if (movieCache.isEmpty()) {
+            var tmdbData = tmdbService.getMovieDetails(tmdbId.longValue());
             MovieCache novoFilme = new MovieCache();
             novoFilme.setTmdbId(tmdbId);
-            filmeAvaliado = movieCacheRepository.save(novoFilme);
-        } else {
-            filmeAvaliado = movieCache.get();
-        }
+            novoFilme.setTitle(tmdbData.title());
+            novoFilme.setPosterPath(tmdbData.posterUrl());
+            novoFilme.setRunTimeMinutes(tmdbData.runtime());
+            novoFilme.setGenres(tmdbData.genre());
+            return movieCacheRepository.save(novoFilme);
+        });
 
-        Optional<UserMovie> avaliacaoExistente = userMovieRepository.findByUserAndMovie(user, filmeAvaliado);
+        UserMovie registroFinal = userMovieRepository.findByUserAndMovie(user, filmeAvaliado)
+                .orElse(new UserMovie());
 
-        UserMovie registroFinal;
+        registroFinal.setUser(user);
+        registroFinal.setMovie(filmeAvaliado);
+        registroFinal.setRating(rating);
+        registroFinal.setIsFavorite(isFavorite);
+        registroFinal.setIsIgnored(isIgnored);
 
-        if (avaliacaoExistente.isPresent()) {
-            avaliacaoExistente.get().setRating(rating);
-            avaliacaoExistente.get().setIsIgnored(isIgnored);
-
-            registroFinal = avaliacaoExistente.get();
-
-        }else {
-
-            UserMovie userMovieResult = new UserMovie();
-            userMovieResult.setRating(rating);
-            userMovieResult.setIsIgnored(isIgnored);
-            userMovieResult.setUser(user);
-            userMovieResult.setMovie(filmeAvaliado);
-
-            registroFinal = userMovieResult;
-        }
-
-        userMovieRepository.save(registroFinal);
-        return registroFinal;
+        return userMovieRepository.save(registroFinal);
     }
 
     public List<UserMovieResponseDTO> getUserMovies(User user) {
