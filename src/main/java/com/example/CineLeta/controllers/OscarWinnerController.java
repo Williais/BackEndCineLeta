@@ -1,6 +1,6 @@
 package com.example.CineLeta.controllers;
 
-import com.example.CineLeta.models.OscarWinner;
+import com.example.CineLeta.dtos.MovieDetailDTO;
 import com.example.CineLeta.services.OscarWinnerService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,8 +17,8 @@ public class OscarWinnerController {
     }
 
     @GetMapping("/random")
-    public ResponseEntity<OscarWinner> getRandomMovie(@RequestParam(required = false) String category) {
-        OscarWinner resultado = oscarWinnerService.getRandomMovie(category);
+    public ResponseEntity<MovieDetailDTO> getRandomMovie(@RequestParam(required = false) String category) {
+        MovieDetailDTO resultado = oscarWinnerService.getRandomMovie(category);
 
         return ResponseEntity.ok(resultado);
     }

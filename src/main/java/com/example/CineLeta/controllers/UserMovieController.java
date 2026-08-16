@@ -1,5 +1,6 @@
 package com.example.CineLeta.controllers;
 
+import com.example.CineLeta.dtos.DashboardDTO;
 import com.example.CineLeta.dtos.EvaluationRequestDTO;
 import com.example.CineLeta.models.User;
 import com.example.CineLeta.models.UserMovie;
@@ -36,9 +37,19 @@ public class UserMovieController {
                 dto.tmdbId(),
                 dto.rating(),
                 dto.isFavorite(),
-                dto.isIgnored()
+                dto.isIgnored(),
+                dto.taggedEmails()
         );
 
         return ResponseEntity.ok(savedInteraction);
+    }
+
+    @GetMapping("/dashboard")
+    public ResponseEntity<DashboardDTO> getDashboard(@AuthenticationPrincipal OAuth2User principal) {
+        String email = principal.getAttribute("email");
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Usuário não encontrado."));
+
+        return ResponseEntity.ok(userMovieService.getDashboardStats(user));
     }
 }
