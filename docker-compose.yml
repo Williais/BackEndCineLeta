@@ -17,6 +17,8 @@ services:
   backend:
     build: .
     container_name: cineleta-api
+    ports:
+      - "8080:8080"
     environment:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/cineleta
       - SPRING_DATASOURCE_USERNAME=postgres
@@ -27,21 +29,5 @@ services:
       - postgres
     restart: always
 
-  caddy:
-    image: caddy:2-alpine
-    container_name: cineleta-caddy
-    restart: unless-stopped
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - ./Caddyfile:/etc/caddy/Caddyfile
-      - caddy_data:/data
-      - caddy_config:/config
-    depends_on:
-      - backend
-
 volumes:
   pgdata:
-  caddy_data:
-  caddy_config:

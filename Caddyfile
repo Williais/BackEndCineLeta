@@ -1,3 +1,0 @@
-srv1893667.hstgr.cloud {
-    reverse_proxy backend:8080
-}
